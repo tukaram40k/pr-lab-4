@@ -1,5 +1,6 @@
 require 'sinatra'
 require 'sinatra/cross_origin'
+require 'json'
 require_relative './lib/store'
 
 if ARGV.length < 1
@@ -18,6 +19,8 @@ end
 
 before do
   response.headers['Access-Control-Allow-Origin'] = '*'
+  response.headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
+  response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
   if request.content_type == 'application/json'
     body = request.body.read
     @json_params = JSON.parse(body) unless body.empty?
@@ -27,7 +30,14 @@ end
 STORE = Store.new
 
 get '/' do
-  send 'leader is up'
+  'leader is up'
+end
+
+# Handle OPTIONS requests for CORS preflight
+options '*' do
+  response.headers['Allow'] = 'GET, PUT, OPTIONS'
+  response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+  200
 end
 
 # GET /read
@@ -71,6 +81,4 @@ put '/write' do
   end
 end
 
-after do
-  puts "leader listening at http://localhost:#{port}" if request.path_info == '/'
-end
+puts "leader listening at http://localhost:#{port}"
