@@ -10,3 +10,7 @@ gem "puma", "~> 7.1"
 gem "nyaplot", "~> 0.1.6"
 
 gem "csv", "~> 3.3"
+
+gem "dotenv", "~> 3.1"
+
+gem "http", "~> 5.3"
