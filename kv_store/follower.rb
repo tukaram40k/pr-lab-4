@@ -14,6 +14,7 @@ abort 'invalid port' if port < 0
 
 set :port, port
 set :bind, '0.0.0.0'
+set :environment, :production
 
 configure do
   enable :cross_origin

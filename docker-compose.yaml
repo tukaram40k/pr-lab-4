@@ -1,0 +1,56 @@
+services:
+  leader:
+    build: .
+    container_name: kv_leader
+    command: ["bundle", "exec", "ruby", "kv_store/leader.rb", "4567"]
+    ports:
+      - "4567:4567"
+    env_file:
+      - .env
+    environment:
+      FOLLOWERS: "http://follower1:4568,http://follower2:4569,http://follower3:4570,http://follower4:4571,http://follower5:4572"
+
+  follower1:
+    build: .
+    container_name: kv_follower1
+    command: ["bundle", "exec", "ruby", "kv_store/follower.rb", "4568"]
+    ports:
+      - "4568:4568"
+    env_file:
+      - .env
+
+  follower2:
+    build: .
+    container_name: kv_follower2
+    command: ["bundle", "exec", "ruby", "kv_store/follower.rb", "4569"]
+    ports:
+      - "4569:4569"
+    env_file:
+      - .env
+
+  follower3:
+    build: .
+    container_name: kv_follower3
+    command: [ "bundle", "exec", "ruby", "kv_store/follower.rb", "4570" ]
+    ports:
+      - "4570:4570"
+    env_file:
+      - .env
+
+  follower4:
+    build: .
+    container_name: kv_follower4
+    command: [ "bundle", "exec", "ruby", "kv_store/follower.rb", "4571" ]
+    ports:
+      - "4571:4571"
+    env_file:
+      - .env
+
+  follower5:
+    build: .
+    container_name: kv_follower5
+    command: [ "bundle", "exec", "ruby", "kv_store/follower.rb", "4572" ]
+    ports:
+      - "4572:4572"
+    env_file:
+      - .env
