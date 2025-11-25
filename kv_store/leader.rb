@@ -36,6 +36,7 @@ FOLLOWERS = ENV['FOLLOWERS'].split(',')
 QUORUM = ENV['WRITE_QUORUM'].to_i
 MIN_DELAY = ENV['MIN_DELAY'].to_i
 MAX_DELAY = ENV['MAX_DELAY'].to_i
+TIMEOUT = ENV['TIMEOUT'].to_i
 
 get '/' do
   'leader is up'

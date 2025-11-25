@@ -19,6 +19,8 @@ class RequestController
     successes = 0
     mutex = Mutex.new
     cv = ConditionVariable.new
+    quorum_achieved = false
+    timeout_reached = false
 
     ::FOLLOWERS.each do |follower_url|
       Thread.new do
@@ -33,7 +35,8 @@ class RequestController
           if response.code == 200
             mutex.synchronize do
               successes += 1
-              cv.signal if successes >= ::QUORUM
+              cv.signal if successes >= ::QUORUM && !quorum_achieved
+              quorum_achieved = true if successes >= ::QUORUM
             end
           end
         rescue => e
@@ -43,7 +46,20 @@ class RequestController
     end
 
     mutex.synchronize do
-      cv.wait(mutex) until successes >= ::QUORUM
+      timeout_reached = !cv.wait(mutex, ::TIMEOUT / 1000)
+    end
+
+    if timeout_reached && successes < ::QUORUM
+      return {
+        status: 503,
+        body: {
+          status: "quorum not reached",
+          received_key: key,
+          received_value: value,
+          successes: successes,
+          quorum_required: ::QUORUM
+        }
+      }
     end
 
     if result.is_a?(Exception)
