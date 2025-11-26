@@ -2,3 +2,4 @@
 vendor
 plots
 simulation/results.dat
+simulation/diff*
