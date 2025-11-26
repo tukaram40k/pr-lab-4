@@ -9,8 +9,16 @@ for q in $QUORUMS; do
   echo "========================================="
   echo "running with quorum=$q"
 
-  export QUORUM=$q
-  docker compose up -d --build
+  file=".env"
+  new_value=$q
+
+  sed -i '' "s/^WRITE_QUORUM=[0-9][0-9]*$/WRITE_QUORUM=$new_value/" .env
+  docker compose up -d
+
+  while [ "$(docker compose ps --format '{{.Service}}' | wc -l)" -lt "6" ]; do
+    sleep 1
+  done
+  echo "running sim"
 
   latency=$(bundle exec ruby simulation/latency_tester.rb)
 
