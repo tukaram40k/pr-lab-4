@@ -37,4 +37,12 @@ end
 threads.each(&:join)
 
 avg = latencies.sum / latencies.size
-puts avg
+sorted = latencies.sort
+
+if sorted.size.odd?
+  median = sorted[sorted.size / 2]
+else
+  median = (sorted[sorted.size / 2 - 1] + sorted[sorted.size / 2]) / 2.0
+end
+
+puts "#{avg} #{median}"

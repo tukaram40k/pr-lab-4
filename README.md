@@ -140,7 +140,7 @@ This will start the docker containers 5 times with quorum values from `1` to `5`
 
 ![img_2.png](img/img_2.png)
 
-When simulation finishes, it plots the values of average leader response times against quorum values:
+When simulation finishes, it plots the values of mean and median leader response times against quorum values:
 
 ![img_3.png](img/img_3.png)
 

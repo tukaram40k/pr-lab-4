@@ -1,5 +1,5 @@
 .idea
 vendor
 plots
-simulation/results.dat
+simulation/*.dat
 simulation/diff*

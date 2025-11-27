@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
 
-rm simulation/results.dat
-rm simulation/diff*
-
 QUORUMS=(1 2 3 4 5)
 RESULTS_FILE="simulation/results.dat"
+rm $RESULTS_FILE
+rm simulation/diff*
+echo "@ mean,median" >> $RESULTS_FILE
 
 for q in $QUORUMS; do
   echo "========================================="
@@ -22,14 +22,14 @@ for q in $QUORUMS; do
   sleep 1
   echo "running sim"
 
-  latency=$(bundle exec ruby simulation/latency_tester.rb)
+  read -r mean_latency median_latency <<< "$(bundle exec ruby simulation/latency_tester.rb)"
   store_invariant=$(bundle exec ruby simulation/follower_store_checker.rb)
 
-  echo "$q $latency" >> $RESULTS_FILE
+  echo "$q $mean_latency $median_latency" >> $RESULTS_FILE
   echo "all stores match: $store_invariant"
   docker compose down -v
 done
 
-echo "done"
-
-termgraph simulation/results.dat --delim " "
+echo "\ndone"
+echo "\ntime per request vs quorum:"
+termgraph $RESULTS_FILE --color {red,blue}
