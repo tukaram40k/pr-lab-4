@@ -14,7 +14,8 @@ class RequestController
 
   # write and send replicas (leader)
   def self.process_write(key, value)
-    result = ::STORE.write(key, value)
+    version = ::STORE.next_version_for(key)
+    result = ::STORE.write(key, value, version)
 
     successes = 0
     mutex = Mutex.new
@@ -29,8 +30,10 @@ class RequestController
         begin
           puts "sending replicate request to #{follower_url}/replicate"
 
-          response = HTTP.put("#{follower_url}/replicate",
-                              json: { key: key, value: value })
+          response = HTTP.put(
+            "#{follower_url}/replicate",
+            json: { key: key, value: value, version: version }
+          )
 
           if response.code == 200
             mutex.synchronize do
@@ -77,15 +80,31 @@ class RequestController
         body: {
           status: 'success',
           received_key: key,
-          received_value: value
+          received_value: value,
+          version: version
         }
       }
     end
   end
 
   # replicate (follower)
-  def self.process_replicate(key, value)
-    result = ::STORE.write(key, value)
+  def self.process_replicate(key, value, version)
+    current = ::STORE.read_with_version(key)
+
+    if current && current[:version] && version < current[:version]
+      return {
+        status: 200,
+        body: {
+          status: "ignored_old_write",
+          received_key: key,
+          received_value: value,
+          received_version: version,
+          current_version: current[:version]
+        }
+      }
+    end
+
+    result = ::STORE.write(key, value, version)
 
     if result.is_a?(Exception)
       {
@@ -93,7 +112,8 @@ class RequestController
         body: {
           status: "cannot write to store: #{result.message}",
           received_key: key,
-          received_value: value
+          received_value: value,
+          received_version: version
         }
       }
     else
@@ -102,7 +122,8 @@ class RequestController
         body: {
           status: 'success',
           received_key: key,
-          received_value: value
+          received_value: value,
+          received_version: version
         }
       }
     end

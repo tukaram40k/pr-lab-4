@@ -55,8 +55,9 @@ end
 put '/replicate' do
   key = @json_params['key']
   value = @json_params['value']
+  version = @json_params['version']
 
-  response = RequestController.process_replicate(key, value)
+  response = RequestController.process_replicate(key, value, version)
   status response[:status]
   content_type :json
   response[:body].to_json
